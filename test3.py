@@ -33,7 +33,10 @@ def load():
         response = requests.get(card_url % card)
         response2 = requests.get(card_url_gds % card)
         data = response.json()
-        data = data['result']
+        try:
+            data = data['result']
+        except:
+            data = []
         if not data:
             pass
         else:
