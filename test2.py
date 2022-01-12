@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import requests
 import json
+from io import StringIO
 
 st.title('Yoba Unchained')
 
@@ -19,9 +20,6 @@ card_id = ''
 sample = {'proto': 1, 'name': 'name', 'god': 'god', 'set': 'set', 'rarity': 'rarity', 'mana': 'mana', 'effect': 'effect', 'eth_price': 'eth_price', 'eth_price_in_usd': 'eth_price_in_usd',
 'gds_price': 'gds_price', 'gds_price_in_usd': 'gds_price_in_usd', 'diff': 'diff' }
 records = []
-
-with open('cards_top.txt') as my_file:
-    top_cards = my_file.readlines()
 
 def load():
     #records = []
@@ -85,7 +83,6 @@ def load():
 
     print(records)
 
-@st.cache
 def load_data(nrows):
 
     #cf = {'Name of card': data['name'], 'Set': data['set'], 'Rarity': data['rarity'], 'God': data['god'], 'Mana': data['mana'], 'Involved Effects': data['effect']}
@@ -110,20 +107,32 @@ def load_data(nrows):
     cards = pd.DataFrame(records)
     return cards
 
+
 data_load_state = st.text('Loading data...')
+
+uploaded_file = st.file_uploader("Choose a file")
+if st.button('Load'):
+    if uploaded_file is not None:
+        top_cards = StringIO(uploaded_file.getvalue().decode("utf-8"))
+    else:
+        st.write("Default file will be loaded")
+        with open('cards_top.txt') as my_file:
+            top_cards = my_file.readlines()
 data = load_data(1)
 data_load_state.text("Done!")
 
 
 st.write(data)
 
-#st.subheader('Number of pickups by hour')
-#hist_values = np.histogram(data[DATE_COLUMN].dt.hour, bins=24, range=(0,24))[0]
-#st.bar_chart(hist_values)
+def convert_df(df):
+    return df.to_csv().encode('utf-8')
 
-# Some number in the range 0-23
-#hour_to_filter = st.slider('hour', 0, 23, 17)
-#filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
+csv = convert_df(data)
 
-#st.subheader('Map of all pickups at %s:00' % hour_to_filter)
-#st.map(filtered_data)
+st.download_button(
+    "Download CSV",
+    csv,
+    "result.csv",
+    "text/csv",
+    key='result-data'
+)
