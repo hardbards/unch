@@ -83,7 +83,6 @@ def load():
 
     print(records)
 
-@st.cache
 def load_data(nrows):
 
     #cf = {'Name of card': data['name'], 'Set': data['set'], 'Rarity': data['rarity'], 'God': data['god'], 'Mana': data['mana'], 'Involved Effects': data['effect']}
@@ -116,9 +115,24 @@ if st.button('Load'):
     if uploaded_file is not None:
         top_cards = StringIO(uploaded_file.getvalue().decode("utf-8"))
     else:
-        st.write("Failed. Default file will be loaded")
+        st.write("Default file will be loaded")
         with open('cards_top.txt') as my_file:
             top_cards = my_file.readlines()
 data = load_data(1)
 data_load_state.text("Done!")
+
+
 st.write(data)
+
+def convert_df(df):
+    return df.to_csv().encode('utf-8')
+
+csv = convert_df(data)
+
+st.download_button(
+    "Download CSV",
+    csv,
+    "result.csv",
+    "text/csv",
+    key='result-data'
+)
